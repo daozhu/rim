@@ -1,2 +1,0 @@
-# rim
-im in rust
