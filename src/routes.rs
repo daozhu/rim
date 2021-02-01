@@ -17,7 +17,6 @@ pub async fn home() -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().body(back))
 }
 
-
 #[post("/add_product")]
 pub async fn add_product(
     pool: web::Data<Pool>,

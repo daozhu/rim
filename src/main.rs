@@ -56,7 +56,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::del_product)
             .service(
                 actix_files::Files::new("/static", "./static")
-                    .show_files_listing()
+                    .show_files_listing().use_last_modified(true)
             )
             .service(
                 web::resource("/ws/").to(ws_handle)
@@ -65,7 +65,7 @@ async fn main() -> std::io::Result<()> {
                 web::resource("/").to(routes::home)
             )
     })
-        .bind("127.0.0.1:8080")?
+        .bind("127.0.0.1:8886")?
         .run()
         .await
 }
