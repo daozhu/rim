@@ -4,11 +4,11 @@ extern crate diesel;
 use actix_web::{HttpServer, App, web, HttpRequest, HttpResponse, Error};
 use actix_web_actors::ws;
 use diesel::r2d2::{self, ConnectionManager};
-use diesel::SqliteConnection;
+use diesel::MysqlConnection;
 use actix::{Actor, StreamHandler};
 use actix_files;
 
-pub type Pool = r2d2::Pool<ConnectionManager<SqliteConnection>>;
+pub type Pool = r2d2::Pool<ConnectionManager<MysqlConnection>>;
 
 mod schema;
 mod models;
@@ -46,7 +46,7 @@ async fn main() -> std::io::Result<()> {
     let database_url = std::env::var("DATABASE_URL")
         .expect("can not find database");
     let database_pool = Pool::builder()
-        .build(ConnectionManager::<SqliteConnection>::new(database_url))
+        .build(ConnectionManager::<MysqlConnection>::new(database_url))
         .unwrap();
     HttpServer::new(move || {
         App::new()

@@ -2,6 +2,7 @@
  * 创建Vue实例
  */
 var Vm = new Vue({
+    delimiters: ['[[', ']]'],
     el: "#root",
     data: {
         consoleData: [], // 控制台日志

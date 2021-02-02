@@ -21,7 +21,7 @@
     <template>
         <transition name="slide-fade">
             <div class="alert ws-alert monospace" :class=" 'alert-' + alert.class " v-if="alert.state">
-                {{alert.content}}
+                [[alert.content]]
             </div>
         </transition>
     </template>
@@ -199,7 +199,7 @@
                                 <div class="col-sm-12 col-md-5">
                                     <!-- 服务设置 -->
                                     <div class="col-sm-12">
-                                        <h5 class="card-title">服务器配置 状态: {{ instance.readyState | rStatus }}</h5>
+                                        <h5 class="card-title">服务器配置 状态: [[ instance.readyState | rStatus ]]</h5>
                                         <hr class="divider divider-dashed">
                                         <!-- 连接地址 -->
                                         <div class="card-text">
@@ -215,7 +215,7 @@
                                                 </div>
                                                 <input type="text" class="form-control" placeholder="输入不带前缀的服务器地址" v-model="address">
                                                 <div class="input-group-append">
-                                                    <button type="button" class="btn btn-block" :class="connected ? 'btn-danger' : 'btn-success'" @click="autoWsConnect">{{ connected ? '关闭连接' : '开启连接' }}</button>
+                                                    <button type="button" class="btn btn-block" :class="connected ? 'btn-danger' : 'btn-success'" @click="autoWsConnect">[[ connected ? '关闭连接' : '开启连接' ]]</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -236,7 +236,7 @@
                                                 </div>
                                                 <input title="" type="text" class="form-control" v-model="heartBeatContent" :disabled="!connected">
                                                 <div class="input-group-append">
-                                                    <button type="button" class="btn btn-block" :class="autoSend ? 'btn-danger' : 'btn-success'" @click="autoHeartBeat" :disabled="!connected">{{ autoSend ? '停止发送' : '开始发送' }}</button>
+                                                    <button type="button" class="btn btn-block" :class="autoSend ? 'btn-danger' : 'btn-success'" @click="autoHeartBeat" :disabled="!connected">[[ autoSend ? '停止发送' : '开始发送' ]]</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -260,7 +260,7 @@
                                         <div class="card-text">
                                             <div class="card-title console-box" id="console-box">
                                                 <div class="mb-2" v-for="item in consoleData">
-                                                    <strong :class="'text-'+item.type">{{item.time}} => </strong> <span>{{item.content}}</span>
+                                                    <strong :class="'text-'+item.type">[[item.time]] => </strong> <span>[[item.content]]</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -292,8 +292,8 @@
                                         <div class="card-text message-box" id="message-box">
                                             <template v-for="item in messageData">
                                                 <div class="mb-4" :class="{ 'text-left' : item.direction , 'text-right' : !item.direction }">
-                                                    <strong><span :class="{'text-success' : item.direction , 'text-primary' : !item.direction}">{{item.direction ? '发送' : '收到'}}消息</span> {{item.time}}</strong>
-                                                    <div class="monospace" v-if="!recvDecode"> {{ item.content }}</div>
+                                                    <strong><span :class="{'text-success' : item.direction , 'text-primary' : !item.direction}">[[item.direction ? '发送' : '收到']]消息</span> [[item.time]]</strong>
+                                                    <div class="monospace" v-if="!recvDecode"> [[ item.content ]]</div>
                                                     <div class="monospace" v-html='JSON.format(item.content)' v-if="recvDecode"></div>
                                                 </div>
                                             </template>
