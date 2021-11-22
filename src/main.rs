@@ -1,71 +1,50 @@
-#[macro_use]
-extern crate diesel;
+use tokio::{io::{AsyncBufReadExt, AsyncWriteExt, BufReader}, net::{TcpListener}, sync::broadcast};
 
-use actix_web::{HttpServer, App, web, HttpRequest, HttpResponse, Error};
-use actix_web_actors::ws;
-use diesel::r2d2::{self, ConnectionManager};
-use diesel::MysqlConnection;
-use actix::{Actor, StreamHandler};
-use actix_files;
+const LOCAL_SERVER: &str = "0.0.0.0:8888";
 
-pub type Pool = r2d2::Pool<ConnectionManager<MysqlConnection>>;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!(" hello im !");
 
-mod schema;
-mod models;
-mod routes;
+    let listener = TcpListener::bind(LOCAL_SERVER).await?;
 
-struct Ws;
+    let (tx, _rx) = broadcast::channel(12);
 
-impl Actor for Ws {
-    type Context = ws::WebsocketContext<Self>;
-}
+    loop {
+        let (mut socket, addr) = listener.accept().await?;
 
-impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Ws {
-    fn handle(&mut self,
-              msg: Result<ws::Message, ws::ProtocolError>,
-              ctx: &mut Self::Context,
-    ) {
-        match msg {
-            Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
-            Ok(ws::Message::Text(text)) => ctx.text(text),
-            Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
-            _ => (),
-        }
+        println!("{} connected", addr);
+
+        let tx = tx.clone();
+        let mut rx = tx.subscribe();
+
+        tokio::spawn(async move {
+            let (reader, mut writer) = socket.split();
+            let mut reader = BufReader::new(reader);
+            let mut msg = String::new();
+
+            loop {
+                tokio::select! {
+                    result = reader.read_line(&mut msg) => {
+                        if result.unwrap() == 0 {
+                            break;
+                        }
+
+                        println!(" msg: {}", msg);
+
+                        tx.send((msg.clone(), addr)).unwrap();
+                        msg.clear();
+                    }
+
+                    result = rx.recv() => {
+                        let (msg_str, o_addr) = result.unwrap();
+                        if addr != o_addr {
+                            println!("send {} to {}", &msg_str, o_addr);
+                            writer.write_all(msg.as_bytes()).await.unwrap();
+                        }
+                    }
+                }
+            }
+        });
     }
-}
-
-async fn ws_handle(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
-    let resp = ws::start(Ws{}, &req, stream);
-    println!("{:?}", resp);
-    resp
-}
-
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    dotenv::dotenv().ok();
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("can not find database");
-    let database_pool = Pool::builder()
-        .build(ConnectionManager::<MysqlConnection>::new(database_url))
-        .unwrap();
-    HttpServer::new(move || {
-        App::new()
-            .data(database_pool.clone())
-            .service(routes::add_product)
-            .service(routes::get_all_product)
-            .service(routes::del_product)
-            .service(
-                actix_files::Files::new("/static", "./static")
-                    .show_files_listing().use_last_modified(true)
-            )
-            .service(
-                web::resource("/ws/").to(ws_handle)
-            )
-            .service(
-                web::resource("/").to(routes::home)
-            )
-    })
-        .bind("127.0.0.1:8886")?
-        .run()
-        .await
 }
