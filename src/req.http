@@ -1,0 +1,14 @@
+### 请求实例
+
+### get
+GET http://0.0.0.0:8882/ HTTP/1.1 
+
+
+### post1
+POST http://0.0.0.0:8882/json HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "daozhu",
+    "age": 10
+}

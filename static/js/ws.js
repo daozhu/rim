@@ -224,7 +224,7 @@ var Vm = new Vue({
             this.messageData = [];
         },
         release: function(controller, action, parmas){
-            var message = {controller: controller, action: action, parmas, parmas};
+            var message = {controller: controller, action: action, parmas: parmas};
 
             try {
                 Vm.instance.send(JSON.stringify(message));
